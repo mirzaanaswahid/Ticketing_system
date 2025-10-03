@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Ticket</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f2f2f7; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .ticket-preview { background: white; border: 2px dashed #ddd; border-radius: 10px; padding: 20px; }
+    .ticket-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px; display:flex; align-items:center; gap:12px; }
+    .ticket-logo { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .ticket-body { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .ticket-details { display: grid; gap: 15px; }
+    .ticket-row { display: flex; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+    .ticket-label { font-weight: 600; color: #666; }
+    .ticket-value { color: #333; font-weight: 500; }
+    .qr-section { text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+    #qrcode { display:inline-block; padding:10px; background:white; border:2px solid #e0e0e0; border-radius:8px; }
+
+    @media print {
+      .container { max-width: 100%; }
+      @page { margin: 12mm; }
+      .ticket-preview, .ticket-header, .ticket-body, .ticket-row, .ticket-label, .ticket-value, .qr-section, #qrcode, #qrcode img, #qrcode canvas, #qrcode svg {
+        -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; forced-color-adjust: none !important;
+      }
+    }
+  </style>
+  <script>
+    async function loadTicket() {
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      if (!id) { document.getElementById('container').innerHTML = '<p>Missing ticket id.</p>'; return; }
+      try {
+        const res = await fetch(`/api/tickets/${id}`);
+        if (!res.ok) throw new Error('Ticket not found');
+        const t = await res.json();
+        document.getElementById('ticketOperator').textContent = t.operator;
+        document.getElementById('displayName').textContent = t.name;
+        document.getElementById('displayId').textContent = t.idNumber;
+        document.getElementById('displayTrip').textContent = t.trip;
+        document.getElementById('displaySeat').textContent = t.seat;
+        document.getElementById('displayOrigin').textContent = t.origin;
+        document.getElementById('displayDestination').textContent = t.destination;
+        const formattedDate = new Date(t.departureDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        document.getElementById('displayDeparture').textContent = `${formattedDate} at ${t.departureTime}`;
+        document.getElementById('displayPrice').textContent = `$${parseFloat(t.price).toFixed(2)}`;
+
+        const qrPayload = JSON.stringify({ id, ...t });
+        new QRCode(document.getElementById('qrcode'), { text: qrPayload, width: 150, height: 150, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H });
+      } catch (e) {
+        document.getElementById('container').innerHTML = `<p>${e.message}</p>`;
+      }
+    }
+    window.addEventListener('DOMContentLoaded', loadTicket);
+  </script>
+</head>
+<body>
+  <div class="container" id="container">
+    <div class="ticket-preview">
+      <div class="ticket-header">
+        <img src="logo/logo.jpg" alt="Logo" class="ticket-logo" onerror="this.style.display='none'"/>
+        <div>
+          <h3>BOARDING PASS</h3>
+          <div id="ticketOperator"></div>
+        </div>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-details">
+          <div class="ticket-row"><span class="ticket-label">Passenger Name:</span><span class="ticket-value" id="displayName"></span></div>
+          <div class="ticket-row"><span class="ticket-label">ID/Passport:</span><span class="ticket-value" id="displayId"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Trip/Flight:</span><span class="ticket-value" id="displayTrip"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Seat:</span><span class="ticket-value" id="displaySeat"></span></div>
+          <div class="ticket-row"><span class="ticket-label">From:</span><span class="ticket-value" id="displayOrigin"></span></div>
+          <div class="ticket-row"><span class="ticket-label">To:</span><span class="ticket-value" id="displayDestination"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Departure:</span><span class="ticket-value" id="displayDeparture"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Price:</span><span class="ticket-value" id="displayPrice"></span></div>
+        </div>
+        <div class="qr-section">
+          <h4>Scan for Check-in</h4>
+          <div id="qrcode"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

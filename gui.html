@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Generation System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .app-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto 12px auto;
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .footer-credit {
+            text-align: center;
+            margin-top: 24px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .form-section, .preview-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2, .preview-section h2 {
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-sample {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-sample:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 87, 108, 0.3);
+        }
+
+        .ticket-preview {
+            background: white;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .ticket-content {
+            display: none;
+        }
+
+        .ticket-content.active {
+            display: block;
+        }
+
+        .ticket-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ticket-header h3 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .ticket-body {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .ticket-details {
+            display: grid;
+            gap: 15px;
+        }
+
+        .ticket-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .ticket-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .ticket-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .qr-section {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .qr-section h4 {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            fill: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .ticket-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            background: white;
+        }
+
+        .status-banner {
+            display: none;
+            margin-top: 16px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .status-success { background: #e6ffed; color: #1b5e20; border: 1px solid #a5d6a7; }
+        .status-error { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .header,
+            .form-section,
+            .preview-section h2,
+            .btn {
+                display: none !important;
+            }
+
+            .main-content {
+                display: block;
+            }
+
+            .preview-section {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .ticket-preview {
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+                /* Preserve colors and gradients when printing */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                forced-color-adjust: none !important;
+            }
+
+            .footer-credit { display: none !important; }
+
+            /* Ensure all ticket parts keep their colors/gradients in print */
+            .ticket-content,
+            .ticket-header,
+            .ticket-body,
+            .ticket-details,
+            .ticket-row,
+            .ticket-label,
+            .ticket-value,
+            .qr-section,
+            .ticket-logo,
+            .app-logo,
+            #qrcode,
+            #qrcode img,
+            #qrcode canvas,
+            #qrcode svg {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                forced-color-adjust: none !important;
+            }
+
+            /* Keep QR code edges crisp for scanners without altering on-screen UI */
+            #qrcode img,
+            #qrcode canvas,
+            #qrcode svg {
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+            }
+
+            /* Optional: give the printer some room without altering on-screen UI */
+            @page { margin: 12mm; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-body {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logo/logo.jpg" alt="Logo" class="app-logo" onerror="this.style.display='none'"/>
+            <h1>🎫 Ticket Generation System</h1>
+            <p>Enter passenger details to generate a printable ticket with QR code</p>
+        </div>
+
+        <div class="main-content">
+            <div class="form-section">
+                <h2>Enter Ticket Details</h2>
+                <form id="ticketForm">
+                    <div class="form-group">
+                        <label for="passengerName">Passenger Name *</label>
+                        <input type="text" id="passengerName" required placeholder="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passengerId">Passenger ID/Passport *</label>
+                        <input type="text" id="passengerId" required placeholder="A12345678">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="seatNumber">Seat Number *</label>
+                            <input type="text" id="seatNumber" required placeholder="12A">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tripNumber">Trip/Flight Number *</label>
+                            <input type="text" id="tripNumber" required placeholder="FL123">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="operator">Operator/Airline *</label>
+                        <input type="text" id="operator" required placeholder="Sky Airlines">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="departureDate">Departure Date *</label>
+                            <input type="date" id="departureDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="departureTime">Departure Time *</label>
+                            <input type="time" id="departureTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="origin">Origin *</label>
+                            <input type="text" id="origin" required placeholder="New York (JFK)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="destination">Destination *</label>
+                            <input type="text" id="destination" required placeholder="Los Angeles (LAX)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price">Price *</label>
+                        <input type="number" id="price" step="0.01" required placeholder="299.99">
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button type="submit" class="btn btn-primary">Generate Ticket</button>
+                        <button type="button" class="btn btn-secondary" id="printBtn" disabled>Print Ticket</button>
+                        <button type="button" class="btn btn-sample" id="sampleBtn">Generate Sample Ticket</button>
+                        <div id="statusBanner" class="status-banner"></div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="preview-section">
+                <h2>Ticket Preview</h2>
+                <div class="ticket-preview">
+                    <div class="empty-state" id="emptyState">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <h3>No Ticket Generated Yet</h3>
+                        <p>Fill in the form to generate a ticket</p>
+                    </div>
+
+                    <div class="ticket-content" id="ticketContent">
+                        <div class="ticket-header">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <img src="logo/logo.jpg" alt="Logo" class="ticket-logo" onerror="this.style.display='none'"/>
+                                <div>
+                                    <h3>BOARDING PASS</h3>
+                                    <div id="ticketOperator"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-body">
+                            <div class="ticket-details">
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Passenger Name:</span>
+                                    <span class="ticket-value" id="displayName"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">ID/Passport:</span>
+                                    <span class="ticket-value" id="displayId"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Trip/Flight:</span>
+                                    <span class="ticket-value" id="displayTrip"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Seat:</span>
+                                    <span class="ticket-value" id="displaySeat"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">From:</span>
+                                    <span class="ticket-value" id="displayOrigin"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">To:</span>
+                                    <span class="ticket-value" id="displayDestination"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Departure:</span>
+                                    <span class="ticket-value" id="displayDeparture"></span>
+                                </div>
+
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Price:</span>
+                                    <span class="ticket-value" id="displayPrice"></span>
+                                </div>
+                            </div>
+
+                            <div class="qr-section">
+                                <h4>Scan for Check-in</h4>
+                                <div id="qrcode"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-credit">Developed by Mirza Anas</div>
+
+    <script>
+        let qrCodeInstance = null;
+
+        document.getElementById('ticketForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateTicket();
+        });
+
+        document.getElementById('printBtn').addEventListener('click', function() {
+            // Ensure the ticket preview is scrolled into view before print
+            try {
+                document.querySelector('.ticket-preview').scrollIntoView({ behavior: 'instant', block: 'start' });
+            } catch(_) {}
+            // Trigger print, and when print dialog closes, reset form for next passenger
+            const onAfterPrint = () => {
+                try {
+                    document.getElementById('ticketForm').reset();
+                    document.getElementById('departureDate').valueAsDate = new Date();
+                    document.getElementById('emptyState').style.display = 'block';
+                    document.getElementById('ticketContent').classList.remove('active');
+                    document.getElementById('printBtn').disabled = true;
+                    document.getElementById('qrcode').innerHTML = '';
+                } catch (_) {}
+                window.removeEventListener('afterprint', onAfterPrint);
+            };
+            window.addEventListener('afterprint', onAfterPrint);
+            window.print();
+        });
+
+        document.getElementById('sampleBtn').addEventListener('click', function() {
+            generateSampleTicket();
+        });
+
+        function generateSampleTicket() {
+            // Sample data arrays for random selection
+            const firstNames = ['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Maria', 'James', 'Anna'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Martinez', 'Anderson'];
+            const airlines = ['Sky Airlines', 'Global Airways', 'Pacific Air', 'Continental Express', 'Atlantic Airlines', 'Eagle Wings', 'Horizon Air'];
+            const cities = [
+                { city: 'New York', code: 'JFK' },
+                { city: 'Los Angeles', code: 'LAX' },
+                { city: 'Chicago', code: 'ORD' },
+                { city: 'London', code: 'LHR' },
+                { city: 'Paris', code: 'CDG' },
+                { city: 'Tokyo', code: 'NRT' },
+                { city: 'Sydney', code: 'SYD' },
+                { city: 'Dubai', code: 'DXB' },
+                { city: 'Singapore', code: 'SIN' },
+                { city: 'Hong Kong', code: 'HKG' }
+            ];
+
+            // Generate random sample data
+            const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const randomName = `${randomFirstName} ${randomLastName}`;
+            
+            const randomId = 'P' + Math.random().toString(36).substr(2, 8).toUpperCase();
+            const randomSeat = Math.floor(Math.random() * 30 + 1) + ['A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 6)];
+            const randomFlight = ['FL', 'AA', 'UA', 'DL', 'BA'][Math.floor(Math.random() * 5)] + 
+                                Math.floor(Math.random() * 9000 + 1000);
+            const randomOperator = airlines[Math.floor(Math.random() * airlines.length)];
+            
+            const randomOriginIndex = Math.floor(Math.random() * cities.length);
+            let randomDestIndex = Math.floor(Math.random() * cities.length);
+            while (randomDestIndex === randomOriginIndex) {
+                randomDestIndex = Math.floor(Math.random() * cities.length);
+            }
+            
+            const randomOrigin = `${cities[randomOriginIndex].city} (${cities[randomOriginIndex].code})`;
+            const randomDestination = `${cities[randomDestIndex].city} (${cities[randomDestIndex].code})`;
+            
+            // Generate random future date (1-60 days from now)
+            const today = new Date();
+            const futureDate = new Date(today.getTime() + (Math.floor(Math.random() * 60 + 1) * 24 * 60 * 60 * 1000));
+            const randomDate = futureDate.toISOString().split('T')[0];
+            
+            // Generate random time
+            const randomHour = Math.floor(Math.random() * 24).toString().padStart(2, '0');
+            const randomMinute = ['00', '15', '30', '45'][Math.floor(Math.random() * 4)];
+            const randomTime = `${randomHour}:${randomMinute}`;
+            
+            // Generate random price between 99 and 1999
+            const randomPrice = (Math.floor(Math.random() * 1900 + 100) + 0.99).toFixed(2);
+
+            // Fill in the form with sample data
+            document.getElementById('passengerName').value = randomName;
+            document.getElementById('passengerId').value = randomId;
+            document.getElementById('seatNumber').value = randomSeat;
+            document.getElementById('tripNumber').value = randomFlight;
+            document.getElementById('operator').value = randomOperator;
+            document.getElementById('departureDate').value = randomDate;
+            document.getElementById('departureTime').value = randomTime;
+            document.getElementById('origin').value = randomOrigin;
+            document.getElementById('destination').value = randomDestination;
+            document.getElementById('price').value = randomPrice;
+
+            // Generate the ticket
+            generateTicket();
+        }
+
+        async function generateTicket() {
+            // Get form values
+            const passengerName = document.getElementById('passengerName').value;
+            const passengerId = document.getElementById('passengerId').value;
+            const seatNumber = document.getElementById('seatNumber').value;
+            const tripNumber = document.getElementById('tripNumber').value;
+            const operator = document.getElementById('operator').value;
+            const departureDate = document.getElementById('departureDate').value;
+            const departureTime = document.getElementById('departureTime').value;
+            const origin = document.getElementById('origin').value;
+            const destination = document.getElementById('destination').value;
+            const price = document.getElementById('price').value;
+
+            // Format date and time
+            const formattedDate = new Date(departureDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            const formattedDateTime = `${formattedDate} at ${departureTime}`;
+
+            // Update ticket display
+            document.getElementById('ticketOperator').textContent = operator;
+            document.getElementById('displayName').textContent = passengerName;
+            document.getElementById('displayId').textContent = passengerId;
+            document.getElementById('displayTrip').textContent = tripNumber;
+            document.getElementById('displaySeat').textContent = seatNumber;
+            document.getElementById('displayOrigin').textContent = origin;
+            document.getElementById('displayDestination').textContent = destination;
+            document.getElementById('displayDeparture').textContent = formattedDateTime;
+            document.getElementById('displayPrice').textContent = `$${parseFloat(price).toFixed(2)}`;
+
+            // Generate QR code data
+            const qrData = JSON.stringify({
+                name: passengerName,
+                id: passengerId,
+                seat: seatNumber,
+                trip: tripNumber,
+                operator: operator,
+                departure: `${departureDate} ${departureTime}`,
+                origin: origin,
+                destination: destination
+            });
+
+            // Clear existing QR code if any
+            if (qrCodeInstance) {
+                document.getElementById('qrcode').innerHTML = '';
+            }
+
+            // Generate new QR code
+            qrCodeInstance = new QRCode(document.getElementById('qrcode'), {
+                text: qrData,
+                width: 150,
+                height: 150,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Show ticket and enable print button
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('ticketContent').classList.add('active');
+            document.getElementById('printBtn').disabled = false;
+
+            // Smooth scroll to preview
+            document.querySelector('.preview-section').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+
+            // Persist to CSV via local server
+            const payload = {
+                name: passengerName,
+                id: passengerId,
+                seat: seatNumber,
+                trip: tripNumber,
+                operator,
+                departureDate,
+                departureTime,
+                origin,
+                destination,
+                price
+            };
+            const banner = document.getElementById('statusBanner');
+            const showBanner = (msg, ok) => {
+                banner.textContent = msg;
+                banner.classList.remove('status-success', 'status-error');
+                banner.classList.add('status-banner', ok ? 'status-success' : 'status-error');
+                banner.style.display = 'block';
+                setTimeout(() => { banner.style.display = 'none'; }, 3000);
+            };
+
+            try {
+                const res = await fetch('http://localhost:3000/api/passengers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || data.ok === false) {
+                    throw new Error(data.error || `Server error (${res.status})`);
+                }
+                showBanner('Saved to CSV', true);
+
+                // Repoint QR to a shareable URL for this ticket id
+                if (data.id) {
+                    const qrUrl = `${location.origin}/ticket.html?id=${data.id}`;
+                    document.getElementById('qrcode').innerHTML = '';
+                    qrCodeInstance = new QRCode(document.getElementById('qrcode'), {
+                        text: qrUrl,
+                        width: 150,
+                        height: 150,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+            } catch (err) {
+                // If server not running or network blocked, inform user
+                showBanner(`Could not save to CSV: ${err.message || err}`, false);
+            }
+        }
+
+        // Set today's date as default
+        document.getElementById('departureDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>

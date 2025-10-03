@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# VS Code and OS files
+.vscode/
+*.code-workspace
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+
+# Local data output
+data/
+
+# Logs
+*.log
