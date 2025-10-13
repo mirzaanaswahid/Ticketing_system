@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket Generation System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -194,19 +194,19 @@
 
         .ticket-body {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr; /* Single column now that QR is removed */
             gap: 20px;
         }
 
         .ticket-details {
             display: grid;
-            gap: 15px;
+            gap: 18px; /* Slightly larger spacing to fill space */
         }
 
         .ticket-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
+            padding: 16px; /* Increased to fill vertical space */
             background: #f8f9fa;
             border-radius: 5px;
         }
@@ -221,25 +221,7 @@
             font-weight: 500;
         }
 
-        .qr-section {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .qr-section h4 {
-            margin-bottom: 15px;
-            color: #666;
-        }
-
-        #qrcode {
-            display: inline-block;
-            padding: 10px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-        }
+        
 
         .empty-state {
             text-align: center;
@@ -317,24 +299,11 @@
             .ticket-row,
             .ticket-label,
             .ticket-value,
-            .qr-section,
             .ticket-logo,
-            .app-logo,
-            #qrcode,
-            #qrcode img,
-            #qrcode canvas,
-            #qrcode svg {
+            .app-logo {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 forced-color-adjust: none !important;
-            }
-
-            /* Keep QR code edges crisp for scanners without altering on-screen UI */
-            #qrcode img,
-            #qrcode canvas,
-            #qrcode svg {
-                image-rendering: crisp-edges;
-                image-rendering: pixelated;
             }
 
             /* Optional: give the printer some room without altering on-screen UI */
@@ -360,74 +329,107 @@
     <div class="container">
         <div class="header">
             <img src="logo/logo.jpg" alt="Logo" class="app-logo" onerror="this.style.display='none'"/>
-            <h1>🎫 Ticket Generation System</h1>
-            <p>Enter passenger details to generate a printable ticket with QR code</p>
+            <h1>ASSL Charter Flight Check-In Pass Itinerary</h1>
+            <p>Aircraft Sales &amp; Services (Pvt) Limited</p>
         </div>
 
         <div class="main-content">
             <div class="form-section">
-                <h2>Enter Ticket Details</h2>
+                <h2>Enter Ticket Details (ASSL)</h2>
                 <form id="ticketForm">
-                    <div class="form-group">
-                        <label for="passengerName">Passenger Name *</label>
-                        <input type="text" id="passengerName" required placeholder="John Doe">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="passengerId">Passenger ID/Passport *</label>
-                        <input type="text" id="passengerId" required placeholder="A12345678">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reservationNo">Reservation No. (auto, 8-9 digits)</label>
+                            <input type="text" id="reservationNo" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookingRef">Booking Reference No. (auto)</label>
+                            <input type="text" id="bookingRef" readonly>
+                        </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="seatNumber">Seat Number *</label>
-                            <input type="text" id="seatNumber" required placeholder="12A">
+                            <label for="title">Title *</label>
+                            <select id="title" required>
+                                <option value="">Select</option>
+                                <option>Mr</option>
+                                <option>Ms</option>
+                                <option>Mrs</option>
+                                <option>Dr</option>
+                            </select>
                         </div>
-
                         <div class="form-group">
-                            <label for="tripNumber">Trip/Flight Number *</label>
-                            <input type="text" id="tripNumber" required placeholder="FL123">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" required placeholder="First Name">
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="operator">Operator/Airline *</label>
-                        <input type="text" id="operator" required placeholder="Sky Airlines">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="departureDate">Departure Date *</label>
-                            <input type="date" id="departureDate" required>
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" required placeholder="Last Name">
                         </div>
-
                         <div class="form-group">
-                            <label for="departureTime">Departure Time *</label>
-                            <input type="time" id="departureTime" required>
+                            <label for="flightNumber">Flight Number *</label>
+                            <select id="flightNumber" required>
+                                <option value="">Select</option>
+                                <option>SS-701</option>
+                                <option>SS-702</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="origin">Origin *</label>
-                            <input type="text" id="origin" required placeholder="New York (JFK)">
+                            <select id="origin" required>
+                                <option value="">Select</option>
+                                <option>Karachi (KHI)</option>
+                                <option>RekoDiq (REQ)</option>
+                            </select>
                         </div>
-
                         <div class="form-group">
                             <label for="destination">Destination *</label>
-                            <input type="text" id="destination" required placeholder="Los Angeles (LAX)">
+                            <select id="destination" required>
+                                <option value="">Select</option>
+                                <option>Karachi (KHI)</option>
+                                <option>RekoDiq (REQ)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="departureDate">Departure Date (ETD) *</label>
+                            <input type="date" id="departureDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="departureTime">Departure Time (ETD) *</label>
+                            <input type="time" id="departureTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="arrivalDate">Arrival Date (ETA) *</label>
+                            <input type="date" id="arrivalDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="arrivalTime">Arrival Time (ETA) *</label>
+                            <input type="time" id="arrivalTime" required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="price">Price *</label>
-                        <input type="number" id="price" step="0.01" required placeholder="299.99">
+                        <label for="duration">Flight Duration (HH:MM)</label>
+                        <input type="text" id="duration" placeholder="HH:MM" pattern="^[0-9]{1,2}:[0-5][0-9]$">
                     </div>
 
                     <div style="margin-top: 30px;">
                         <button type="submit" class="btn btn-primary">Generate Ticket</button>
                         <button type="button" class="btn btn-secondary" id="printBtn" disabled>Print Ticket</button>
-                        <button type="button" class="btn btn-sample" id="sampleBtn">Generate Sample Ticket</button>
+                        <button type="button" class="btn btn-sample" id="sampleBtn">New Ticket (Sample)</button>
                         <div id="statusBanner" class="status-banner"></div>
                     </div>
                 </form>
@@ -449,59 +451,78 @@
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <img src="logo/logo.jpg" alt="Logo" class="ticket-logo" onerror="this.style.display='none'"/>
                                 <div>
-                                    <h3>BOARDING PASS</h3>
-                                    <div id="ticketOperator"></div>
+                                    <h3>ASSL Charter Flight Check-In Pass Itinerary</h3>
+                                    <div>Aircraft Sales &amp; Services (Pvt) Limited</div>
+                                    <div style="font-size:11px; opacity:0.95; margin-top:4px; line-height:1.3;">
+                                        Hamilton Hangar 301, General Aviation Area, JIAP, Karachi, 75200, Pakistan<br/>
+                                        Phones: 92-21-34598536-40 (5 Lines) E-mail: customercare@asslpk.com, Website: www.asslpk.com
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="ticket-body">
                             <div class="ticket-details">
+                                <!-- Move Flight Details block to the top -->
+                                <div class="ticket-row" style="background:#eef2ff;">
+                                    <span class="ticket-label">Flight Details:</span>
+                                    <span class="ticket-value"></span>
+                                </div>
                                 <div class="ticket-row">
-                                    <span class="ticket-label">Passenger Name:</span>
+                                    <span class="ticket-label">Departure (ETD):</span>
+                                    <span class="ticket-value" id="displayETD"></span>
+                                </div>
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Arrival (ETA):</span>
+                                    <span class="ticket-value" id="displayETA"></span>
+                                </div>
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Flight Duration:</span>
+                                    <span class="ticket-value" id="displayDuration"></span>
+                                </div>
+                                <!-- Existing details follow -->
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Reservation No.:</span>
+                                    <span class="ticket-value" id="displayReservation"></span>
+                                </div>
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Passenger's Name:</span>
                                     <span class="ticket-value" id="displayName"></span>
                                 </div>
-
                                 <div class="ticket-row">
-                                    <span class="ticket-label">ID/Passport:</span>
-                                    <span class="ticket-value" id="displayId"></span>
+                                    <span class="ticket-label">Booking Reference No.:</span>
+                                    <span class="ticket-value" id="displayBookingRef"></span>
                                 </div>
-
                                 <div class="ticket-row">
-                                    <span class="ticket-label">Trip/Flight:</span>
-                                    <span class="ticket-value" id="displayTrip"></span>
+                                    <span class="ticket-label">Flight Number:</span>
+                                    <span class="ticket-value" id="displayFlightNumber"></span>
                                 </div>
-
-                                <div class="ticket-row">
-                                    <span class="ticket-label">Seat:</span>
-                                    <span class="ticket-value" id="displaySeat"></span>
-                                </div>
-
                                 <div class="ticket-row">
                                     <span class="ticket-label">From:</span>
                                     <span class="ticket-value" id="displayOrigin"></span>
                                 </div>
-
                                 <div class="ticket-row">
                                     <span class="ticket-label">To:</span>
                                     <span class="ticket-value" id="displayDestination"></span>
                                 </div>
-
-                                <div class="ticket-row">
-                                    <span class="ticket-label">Departure:</span>
-                                    <span class="ticket-value" id="displayDeparture"></span>
+                                <div class="ticket-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                                    <span class="ticket-label">Terms &amp; Conditions:</span>
+                                    <span class="ticket-value" style="white-space: pre-wrap; font-size: 12px; line-height: 1.4;">
+Terms & Conditions:
+ All passsengers are requested to bring their CNIC/PASSPORT along with them.
+ Carryon bag per passenger /SIZE LIMIT: 29in x 20in x 13in/ WEIGHT LIMIT: 15 kg for Checked
+baggage and 7kg as carry on baggage.
+ Passenger are requested to report at least one hour thirty minutes before the schedule departure time.
+Check-in counter will be closed 30 minutes prior to estimated time of departure.
+ Laptops/iPads, power banks, mobile phones or any other battery equipped electronic devices are only
+allowed in carry on baggage and should not be stored in the checked baggage
+ Following items are restricted either in checked baggage or in carry on baggage.
+o Most Firearms, explosives, and dangerous chemicals
+                                    </span>
                                 </div>
-
-                                <div class="ticket-row">
-                                    <span class="ticket-label">Price:</span>
-                                    <span class="ticket-value" id="displayPrice"></span>
-                                </div>
+                                
                             </div>
 
-                            <div class="qr-section">
-                                <h4>Scan for Check-in</h4>
-                                <div id="qrcode"></div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -512,11 +533,101 @@
     <div class="footer-credit">Developed by Mirza Anas</div>
 
     <script>
-        let qrCodeInstance = null;
+    let qrCodeInstance = null; // QR removed
+
+        function generateReservationNo() {
+            // Generate 8-9 digit numeric code (random). Here we use 9 digits.
+            const min = 100000000; // 9-digit minimum
+            const max = 999999999; // 9-digit maximum
+            return String(Math.floor(Math.random() * (max - min + 1)) + min);
+        }
+
+        function setDefaults() {
+            // Auto set reservation no
+            const resEl = document.getElementById('reservationNo');
+            if (resEl && !resEl.value) resEl.value = generateReservationNo();
+            // Set default flight details
+            try {
+                const today = new Date();
+                const toDate = d => d.toISOString().split('T')[0];
+                const depDate = toDate(today);
+                const arr = new Date(today.getTime() + 90*60000);
+                const arrDate = toDate(arr);
+                const depTime = '07:00';
+                const arrTime = '08:30';
+                const dur = '01:30';
+                document.getElementById('departureDate').value = depDate;
+                document.getElementById('departureTime').value = depTime;
+                document.getElementById('arrivalDate').value = arrDate;
+                document.getElementById('arrivalTime').value = arrTime;
+                document.getElementById('duration').value = dur;
+            } catch(_) {}
+        }
+
+        async function ensureBookingRef() {
+            const refEl = document.getElementById('bookingRef');
+            if (!refEl.value) {
+                try {
+                    const r = await fetch('/api/next-booking-ref');
+                    const d = await r.json();
+                    if (d && d.ok && d.next) refEl.value = d.next;
+                } catch (_) {
+                    // Fallback local counter in session if server route not available
+                    const current = Number(sessionStorage.getItem('bookingRefLast') || '1000') + 1;
+                    sessionStorage.setItem('bookingRefLast', String(current));
+                    refEl.value = `AS${current}`;
+                }
+            }
+        }
+
+        function computeDuration(etdDate, etdTime, etaDate, etaTime) {
+            if (!(etdDate && etdTime && etaDate && etaTime)) return '';
+            const start = new Date(`${etdDate}T${etdTime}:00`);
+            const end = new Date(`${etaDate}T${etaTime}:00`);
+            const diffMs = end - start;
+            if (isNaN(diffMs) || diffMs <= 0) return '';
+            const mins = Math.floor(diffMs / 60000);
+            const hh = Math.floor(mins / 60).toString().padStart(2, '0');
+            const mm = (mins % 60).toString().padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
 
         document.getElementById('ticketForm').addEventListener('submit', function(e) {
             e.preventDefault();
             generateTicket();
+        });
+
+        // Auto-compute duration on date/time change
+        ;['departureDate','departureTime','arrivalDate','arrivalTime'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', () => {
+                const dur = computeDuration(
+                    document.getElementById('departureDate').value,
+                    document.getElementById('departureTime').value,
+                    document.getElementById('arrivalDate').value,
+                    document.getElementById('arrivalTime').value
+                );
+                if (dur) document.getElementById('duration').value = dur;
+            });
+        });
+
+        ['origin','destination'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', () => {
+                const o = document.getElementById('origin').value;
+                const d = document.getElementById('destination').value;
+                const banner = document.getElementById('statusBanner');
+                if (o && d && o === d) {
+                    banner.textContent = 'Origin and destination cannot be the same.';
+                    banner.classList.remove('status-success');
+                    banner.classList.add('status-banner','status-error');
+                    banner.style.display = 'block';
+                } else {
+                    banner.style.display = 'none';
+                }
+            });
         });
 
         document.getElementById('printBtn').addEventListener('click', function() {
@@ -528,11 +639,10 @@
             const onAfterPrint = () => {
                 try {
                     document.getElementById('ticketForm').reset();
-                    document.getElementById('departureDate').valueAsDate = new Date();
+                    setDefaults();
                     document.getElementById('emptyState').style.display = 'block';
                     document.getElementById('ticketContent').classList.remove('active');
                     document.getElementById('printBtn').disabled = true;
-                    document.getElementById('qrcode').innerHTML = '';
                 } catch (_) {}
                 window.removeEventListener('afterprint', onAfterPrint);
             };
@@ -541,159 +651,65 @@
         });
 
         document.getElementById('sampleBtn').addEventListener('click', function() {
+            // Reset and create a fresh reservation number
+            try { document.getElementById('ticketForm').reset(); } catch(_) {}
+            document.getElementById('reservationNo').value = generateReservationNo();
+            document.getElementById('bookingRef').value = '';
+            // Set sample flight details
+            try {
+                const today = new Date();
+                const toDate = d => d.toISOString().split('T')[0];
+                document.getElementById('departureDate').value = toDate(today);
+                document.getElementById('departureTime').value = '07:00';
+                const eta = new Date(today.getTime() + 90*60000);
+                document.getElementById('arrivalDate').value = toDate(eta);
+                document.getElementById('arrivalTime').value = '08:30';
+                document.getElementById('duration').value = '01:30';
+            } catch(_) {}
             generateSampleTicket();
         });
 
         function generateSampleTicket() {
-            // Sample data arrays for random selection
             const firstNames = ['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Maria', 'James', 'Anna'];
             const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Martinez', 'Anderson'];
-            const airlines = ['Sky Airlines', 'Global Airways', 'Pacific Air', 'Continental Express', 'Atlantic Airlines', 'Eagle Wings', 'Horizon Air'];
-            const cities = [
-                { city: 'New York', code: 'JFK' },
-                { city: 'Los Angeles', code: 'LAX' },
-                { city: 'Chicago', code: 'ORD' },
-                { city: 'London', code: 'LHR' },
-                { city: 'Paris', code: 'CDG' },
-                { city: 'Tokyo', code: 'NRT' },
-                { city: 'Sydney', code: 'SYD' },
-                { city: 'Dubai', code: 'DXB' },
-                { city: 'Singapore', code: 'SIN' },
-                { city: 'Hong Kong', code: 'HKG' }
-            ];
 
-            // Generate random sample data
             const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
             const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
             const randomName = `${randomFirstName} ${randomLastName}`;
-            
-            const randomId = 'P' + Math.random().toString(36).substr(2, 8).toUpperCase();
-            const randomSeat = Math.floor(Math.random() * 30 + 1) + ['A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 6)];
-            const randomFlight = ['FL', 'AA', 'UA', 'DL', 'BA'][Math.floor(Math.random() * 5)] + 
-                                Math.floor(Math.random() * 9000 + 1000);
-            const randomOperator = airlines[Math.floor(Math.random() * airlines.length)];
-            
-            const randomOriginIndex = Math.floor(Math.random() * cities.length);
-            let randomDestIndex = Math.floor(Math.random() * cities.length);
-            while (randomDestIndex === randomOriginIndex) {
-                randomDestIndex = Math.floor(Math.random() * cities.length);
-            }
-            
-            const randomOrigin = `${cities[randomOriginIndex].city} (${cities[randomOriginIndex].code})`;
-            const randomDestination = `${cities[randomDestIndex].city} (${cities[randomDestIndex].code})`;
-            
-            // Generate random future date (1-60 days from now)
-            const today = new Date();
-            const futureDate = new Date(today.getTime() + (Math.floor(Math.random() * 60 + 1) * 24 * 60 * 60 * 1000));
-            const randomDate = futureDate.toISOString().split('T')[0];
-            
-            // Generate random time
-            const randomHour = Math.floor(Math.random() * 24).toString().padStart(2, '0');
-            const randomMinute = ['00', '15', '30', '45'][Math.floor(Math.random() * 4)];
-            const randomTime = `${randomHour}:${randomMinute}`;
-            
-            // Generate random price between 99 and 1999
-            const randomPrice = (Math.floor(Math.random() * 1900 + 100) + 0.99).toFixed(2);
+            const randomFlight = ['SS-701','SS-702'][Math.floor(Math.random()*2)];
 
-            // Fill in the form with sample data
-            document.getElementById('passengerName').value = randomName;
-            document.getElementById('passengerId').value = randomId;
-            document.getElementById('seatNumber').value = randomSeat;
-            document.getElementById('tripNumber').value = randomFlight;
-            document.getElementById('operator').value = randomOperator;
-            document.getElementById('departureDate').value = randomDate;
-            document.getElementById('departureTime').value = randomTime;
-            document.getElementById('origin').value = randomOrigin;
-            document.getElementById('destination').value = randomDestination;
-            document.getElementById('price').value = randomPrice;
+            // Origin/Destination limited to Karachi/RekoDiq and not equal
+            const places = ['Karachi (KHI)','RekoDiq (REQ)'];
+            const origin = places[Math.floor(Math.random()*2)];
+            const destination = origin === 'Karachi (KHI)' ? 'RekoDiq (REQ)' : 'Karachi (KHI)';
+            document.getElementById('title').value = ['Mr','Ms','Mrs','Dr'][Math.floor(Math.random()*4)];
+            document.getElementById('firstName').value = randomFirstName;
+            document.getElementById('lastName').value = randomLastName;
+            document.getElementById('flightNumber').value = randomFlight;
+            document.getElementById('origin').value = origin;
+            document.getElementById('destination').value = destination;
+            document.getElementById('bookingRef').value = '';
 
-            // Generate the ticket
             generateTicket();
         }
 
         async function generateTicket() {
-            // Get form values
-            const passengerName = document.getElementById('passengerName').value;
-            const passengerId = document.getElementById('passengerId').value;
-            const seatNumber = document.getElementById('seatNumber').value;
-            const tripNumber = document.getElementById('tripNumber').value;
-            const operator = document.getElementById('operator').value;
-            const departureDate = document.getElementById('departureDate').value;
-            const departureTime = document.getElementById('departureTime').value;
+            const reservationNo = document.getElementById('reservationNo').value || generateReservationNo();
+            await ensureBookingRef();
+            const bookingRef = document.getElementById('bookingRef').value;
+            const title = document.getElementById('title').value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const passengerName = [title, firstName, lastName].filter(Boolean).join(' ');
+            const flightNumber = document.getElementById('flightNumber').value;
             const origin = document.getElementById('origin').value;
             const destination = document.getElementById('destination').value;
-            const price = document.getElementById('price').value;
+            const departureDate = document.getElementById('departureDate').value;
+            const departureTime = document.getElementById('departureTime').value;
+            const arrivalDate = document.getElementById('arrivalDate').value;
+            const arrivalTime = document.getElementById('arrivalTime').value;
+            let duration = document.getElementById('duration').value;
 
-            // Format date and time
-            const formattedDate = new Date(departureDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-            const formattedDateTime = `${formattedDate} at ${departureTime}`;
-
-            // Update ticket display
-            document.getElementById('ticketOperator').textContent = operator;
-            document.getElementById('displayName').textContent = passengerName;
-            document.getElementById('displayId').textContent = passengerId;
-            document.getElementById('displayTrip').textContent = tripNumber;
-            document.getElementById('displaySeat').textContent = seatNumber;
-            document.getElementById('displayOrigin').textContent = origin;
-            document.getElementById('displayDestination').textContent = destination;
-            document.getElementById('displayDeparture').textContent = formattedDateTime;
-            document.getElementById('displayPrice').textContent = `$${parseFloat(price).toFixed(2)}`;
-
-            // Generate QR code data
-            const qrData = JSON.stringify({
-                name: passengerName,
-                id: passengerId,
-                seat: seatNumber,
-                trip: tripNumber,
-                operator: operator,
-                departure: `${departureDate} ${departureTime}`,
-                origin: origin,
-                destination: destination
-            });
-
-            // Clear existing QR code if any
-            if (qrCodeInstance) {
-                document.getElementById('qrcode').innerHTML = '';
-            }
-
-            // Generate new QR code
-            qrCodeInstance = new QRCode(document.getElementById('qrcode'), {
-                text: qrData,
-                width: 150,
-                height: 150,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            // Show ticket and enable print button
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('ticketContent').classList.add('active');
-            document.getElementById('printBtn').disabled = false;
-
-            // Smooth scroll to preview
-            document.querySelector('.preview-section').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-
-            // Persist to CSV via local server
-            const payload = {
-                name: passengerName,
-                id: passengerId,
-                seat: seatNumber,
-                trip: tripNumber,
-                operator,
-                departureDate,
-                departureTime,
-                origin,
-                destination,
-                price
-            };
             const banner = document.getElementById('statusBanner');
             const showBanner = (msg, ok) => {
                 banner.textContent = msg;
@@ -703,8 +719,65 @@
                 setTimeout(() => { banner.style.display = 'none'; }, 3000);
             };
 
+            // Validations
+            if (origin && destination && origin === destination) {
+                showBanner('Origin and destination cannot be the same.', false);
+                return;
+            }
+
+            // Update ticket display
+            const fmtDT = (d, t) => {
+                if (!d || !t) return '';
+                const dt = new Date(d);
+                const weekday = dt.toLocaleDateString('en-US', { weekday: 'long' });
+                const dd = String(dt.getDate()).padStart(2,'0');
+                const mm = String(dt.getMonth()+1).padStart(2,'0');
+                const yyyy = dt.getFullYear();
+                const time = t.replace(':','');
+                return `${weekday}, ${dd}-${mm}-${yyyy} at ${time} PST`;
+            };
+            if (!duration) {
+                duration = computeDuration(departureDate, departureTime, arrivalDate, arrivalTime);
+            }
+
+            document.getElementById('displayReservation').textContent = reservationNo;
+            document.getElementById('displayName').textContent = passengerName;
+            document.getElementById('displayBookingRef').textContent = bookingRef;
+            document.getElementById('displayFlightNumber').textContent = flightNumber;
+            document.getElementById('displayOrigin').textContent = origin;
+            document.getElementById('displayDestination').textContent = destination;
+            document.getElementById('displayETD').textContent = fmtDT(departureDate, departureTime);
+            document.getElementById('displayETA').textContent = fmtDT(arrivalDate, arrivalTime);
+            document.getElementById('displayDuration').textContent = duration ? `${duration} HRS` : '';
+
+            // QR/barcode removed per requirement
+
+            // Show ticket and enable print button
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('ticketContent').classList.add('active');
+            document.getElementById('printBtn').disabled = false;
+
+            document.querySelector('.preview-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Persist to CSV via local server (if available)
+            const payload = {
+                reservationNo,
+                title,
+                firstName,
+                lastName,
+                bookingRef,
+                flightNumber,
+                origin,
+                destination,
+                departureDate,
+                departureTime,
+                arrivalDate,
+                arrivalTime,
+                duration
+            };
+
             try {
-                const res = await fetch('http://localhost:3000/api/passengers', {
+                const res = await fetch('/api/passengers', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -714,28 +787,13 @@
                     throw new Error(data.error || `Server error (${res.status})`);
                 }
                 showBanner('Saved to CSV', true);
-
-                // Repoint QR to a shareable URL for this ticket id
-                if (data.id) {
-                    const qrUrl = `${location.origin}/ticket.html?id=${data.id}`;
-                    document.getElementById('qrcode').innerHTML = '';
-                    qrCodeInstance = new QRCode(document.getElementById('qrcode'), {
-                        text: qrUrl,
-                        width: 150,
-                        height: 150,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                }
             } catch (err) {
-                // If server not running or network blocked, inform user
                 showBanner(`Could not save to CSV: ${err.message || err}`, false);
             }
         }
 
-        // Set today's date as default
-        document.getElementById('departureDate').valueAsDate = new Date();
+        // Initialize defaults on load
+        setDefaults();
     </script>
 </body>
 </html>

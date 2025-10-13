@@ -78,20 +78,69 @@ def resolve_data_dir():
 # Resolve data directory (where CSV and tickets will be saved)
 DATA_DIR = resolve_data_dir()
 
-CSV_PATH = os.path.join(DATA_DIR, 'passengers.csv')
+ASSL_CSV_PATH = os.path.join(DATA_DIR, 'tickets_assl.csv')
+BOOKING_SEQ_PATH = os.path.join(DATA_DIR, 'booking_seq.json')
 os.makedirs(DATA_DIR, exist_ok=True)
 TICKETS_DIR = os.path.join(DATA_DIR, 'tickets')
 os.makedirs(TICKETS_DIR, exist_ok=True)
 
-COLUMNS = [
-    'timestamp', 'name', 'id', 'seat', 'trip', 'operator',
-    'departureDate', 'departureTime', 'origin', 'destination', 'price'
+ASSL_COLUMNS = [
+    'timestamp', 'reservationNo', 'title', 'firstName', 'lastName', 'bookingRef',
+    'flightNumber', 'origin', 'destination',
+    'departureDate', 'departureTime', 'arrivalDate', 'arrivalTime', 'duration'
 ]
 
-if not os.path.exists(CSV_PATH):
-    with open(CSV_PATH, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(COLUMNS)
+def _ensure_csv_header(path: str, header: list[str]):
+    if not os.path.exists(path):
+        with open(path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+        return
+    # If file exists, ensure the first row matches desired header; if not, rewrite header preserving rows
+    try:
+        with open(path, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+        if not rows:
+            with open(path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerow(header)
+            return
+        current_header = rows[0]
+        if current_header != header:
+            rows[0] = header
+            with open(path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerows(rows)
+    except Exception:
+        # If anything goes wrong, leave the file as-is
+        pass
+
+_ensure_csv_header(ASSL_CSV_PATH, ASSL_COLUMNS)
+
+def _load_booking_seq():
+    try:
+        with open(BOOKING_SEQ_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            if isinstance(data, dict) and isinstance(data.get('last'), int):
+                return data['last']
+    except Exception:
+        pass
+    return 1000
+
+def _save_booking_seq(last: int):
+    try:
+        with open(BOOKING_SEQ_PATH, 'w', encoding='utf-8') as f:
+            json.dump({ 'last': last }, f)
+    except Exception:
+        pass
+
+@app.get('/api/next-booking-ref')
+def next_booking_ref():
+    last = _load_booking_seq()
+    next_val = last + 1
+    _save_booking_seq(next_val)
+    return jsonify({ 'ok': True, 'next': f"AS{next_val}" })
 
 @app.after_request
 def add_cors_headers(response):
@@ -112,7 +161,11 @@ def add_passenger():
         return ('', 204)
 
     data = request.get_json(silent=True) or {}
-    required_keys = ['name','id','seat','trip','operator','departureDate','departureTime','origin','destination','price']
+    # Only accept ASSL minimal schema (screenshot fields)
+    required_keys = [
+        'reservationNo','title','firstName','lastName','bookingRef','flightNumber','origin','destination',
+        'departureDate','departureTime','arrivalDate','arrivalTime','duration'
+    ]
     missing = [k for k in required_keys if not str(data.get(k, '')).strip()]
     if missing:
         return jsonify({ 'ok': False, 'error': f"Missing fields: {', '.join(missing)}" }), 400
@@ -120,31 +173,33 @@ def add_passenger():
     # Generate a unique ticket id
     ticket_id = uuid.uuid4().hex
 
+    # Write to ASSL CSV (expanded schema only)
     row = [
         datetime.utcnow().isoformat(),
-        data['name'], data['id'], data['seat'], data['trip'], data['operator'],
-        data['departureDate'], data['departureTime'], data['origin'], data['destination'],
-        f"{float(data['price']):.2f}"
+        data['reservationNo'], data['title'], data['firstName'], data['lastName'], data['bookingRef'],
+        data['flightNumber'], data['origin'], data['destination'],
+        data['departureDate'], data['departureTime'], data['arrivalDate'], data['arrivalTime'], data['duration']
     ]
-
-    with open(CSV_PATH, 'a', newline='', encoding='utf-8') as f:
+    with open(ASSL_CSV_PATH, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(row)
-
-    # Persist JSON for lookup by QR
+    # Persist JSON for lookup (ASSL schema)
     ticket_doc = {
         'id': ticket_id,
         'timestamp': datetime.utcnow().isoformat(),
-        'name': data['name'],
-        'idNumber': data['id'],
-        'seat': data['seat'],
-        'trip': data['trip'],
-        'operator': data['operator'],
-        'departureDate': data['departureDate'],
-        'departureTime': data['departureTime'],
+        'reservationNo': data['reservationNo'],
+        'title': data['title'],
+        'firstName': data['firstName'],
+        'lastName': data['lastName'],
+        'bookingRef': data['bookingRef'],
+        'flightNumber': data['flightNumber'],
         'origin': data['origin'],
         'destination': data['destination'],
-        'price': f"{float(data['price']):.2f}"
+        'departureDate': data['departureDate'],
+        'departureTime': data['departureTime'],
+        'arrivalDate': data['arrivalDate'],
+        'arrivalTime': data['arrivalTime'],
+        'duration': data['duration']
     }
     with open(os.path.join(TICKETS_DIR, f"{ticket_id}.json"), 'w', encoding='utf-8') as jf:
         json.dump(ticket_doc, jf, ensure_ascii=False)
